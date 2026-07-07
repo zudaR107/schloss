@@ -1,3 +1,7 @@
+# One-time setup, before first `docker compose up`:
+#   docker network create schloss-net
+# schlussel runs from its own repo (see schlussel/docker-compose.yml) and
+# must be on the same network for schloss to reach it by hostname.
 services:
   schloss:
     build:
@@ -7,17 +11,9 @@ services:
     restart: unless-stopped
     ports:
       - "3000:80"
+    networks:
+      - schloss-net
 
-  # Run Schlüssel alongside in dev — in prod use its own compose
-  schlussel:
-    image: schlussel:latest
-    restart: unless-stopped
-    ports:
-      - "4000:4000"
-    volumes:
-      - schlussel-data:/data
-    environment:
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
-
-volumes:
-  schlussel-data:
+networks:
+  schloss-net:
+    external: true
