@@ -1,0 +1,23 @@
+services:
+  schloss:
+    build:
+      context: .
+      args:
+        VITE_KUVERT_URL: ${KUVERT_URL:-http://localhost:5174}
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+
+  # Run Schlüssel alongside in dev — in prod use its own compose
+  schlussel:
+    image: schlussel:latest
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - schlussel-data:/data
+    environment:
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
+
+volumes:
+  schlussel-data:
