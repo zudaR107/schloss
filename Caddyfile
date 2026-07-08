@@ -1,0 +1,22 @@
+:80 {
+	root * /srv
+	encode gzip zstd
+
+	@authCallback path /auth/callback*
+	handle @authCallback {
+		try_files {path} /index.html
+		file_server
+	}
+
+	handle /auth/* {
+		reverse_proxy schlussel:4000
+	}
+
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+
+	@static path *.js *.css *.png *.jpg *.svg *.ico *.woff2
+	header @static Cache-Control "public, immutable, max-age=31536000"
+}
