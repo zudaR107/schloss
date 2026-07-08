@@ -1,32 +1,55 @@
-# React + TypeScript + Vite
+# Schloss
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Schloss ("castle" / "lock" in German) is the home page and launcher for a small suite of
+self-hosted personal services. It's the first thing you see: it shows which services are
+available and, once you're signed in, a bit of personalization.
 
-Currently, two official plugins are available:
+## How it fits into the platform
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Each service is its own repo, named after a German word related to what it does:
 
-## React Compiler
+- **`schloss`** (this repo) — the home page / launcher
+- [`schlussel`](https://github.com/zudaR107/schlussel) — auth: accounts, login, tokens
+- [`kuvert`](https://github.com/zudaR107/kuvert) — envelope budgeting, the first real
+  service
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Schloss itself stays fully public — it's a launcher, not something worth gating behind
+a login. Logged-out visitors see a generic greeting and a "Войти" (sign in) button;
+signing in redirects to Schlüssel's hosted login page and back, after which the header
+shows your name and a logout option.
 
-## Expanding the Oxlint configuration
+## Local development
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```sh
+pnpm install
+cp .env.example .env
+pnpm dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Runs on `http://localhost:3000`.
+
+```sh
+pnpm test
+pnpm lint
+```
+
+### Environment variables
+
+See `.env.example`. `VITE_KUVERT_URL` and `VITE_SCHLUSSEL_URL` are read at *build* time
+(Vite bakes them into the bundle) — they're where the Kuvert service card links to and
+where the "Войти" button redirects, respectively. `KUVERT_URL` / `SCHLUSSEL_WEB_URL` are
+the same values, but as the Docker build args `docker-compose.yml` passes through.
+
+## Running with Docker
+
+```sh
+docker network create schloss-net   # one-time, shared with the other two repos
+docker compose up -d
+```
+
+Serves on `:3000`, on the same `schloss-net` network as `schlussel` and `kuvert` so it
+can reach both by hostname.
+
+## License
+
+AGPL-3.0 — see [LICENSE](LICENSE).
