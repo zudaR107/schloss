@@ -8,6 +8,7 @@ services:
       context: .
       args:
         VITE_KUVERT_URL: ${KUVERT_URL:-http://localhost:5174}
+        VITE_SCHLUSSEL_URL: ${SCHLUSSEL_WEB_URL:-http://localhost:4001}
     restart: unless-stopped
     ports:
       - "3000:80"

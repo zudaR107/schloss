@@ -10,10 +10,10 @@ const ICONS: Record<Theme, React.ReactNode> = {
 }
 
 const LABELS: Record<Theme, string> = {
-  light: 'Hell',
-  dark:  'Dunkel',
+  light: 'Светлая',
+  dark:  'Тёмная',
   oled:  'OLED',
-  sepia: 'Sepia',
+  sepia: 'Сепия',
 }
 
 export function ThemeToggle() {
@@ -33,7 +33,7 @@ export function ThemeToggle() {
         className="btn-ghost"
         style={{ padding: '0.4rem', borderRadius: 'var(--radius-md)' }}
         onClick={() => setOpen((o) => !o)}
-        aria-label="Thema wechseln"
+        aria-label="Сменить тему"
       >
         {ICONS[theme]}
       </button>

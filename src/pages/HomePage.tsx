@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
-import { Wallet, Plus } from 'lucide-react'
-import { ThemeToggle } from './components/ThemeToggle'
-import { getStoredTheme, applyTheme } from './lib/theme'
+import { Wallet, Plus, LogOut } from 'lucide-react'
+import { ThemeToggle } from '../components/ThemeToggle'
+import { getStoredTheme, applyTheme } from '../lib/theme'
+import { useAuth } from '../hooks/useAuth'
+import { buildSchluesselLoginUrl } from '../lib/authRedirect'
 
 interface Dienst {
   id: string
@@ -17,7 +19,7 @@ const DIENSTE: Dienst[] = [
   {
     id: 'kuvert',
     name: 'Kuvert',
-    beschreibung: 'Haushaltsbuch & Umschlagmethode',
+    beschreibung: 'Бюджет по методу конвертов',
     url: (import.meta.env as Record<string, string>)['VITE_KUVERT_URL'] ?? 'http://localhost:5174',
     icon: <Wallet size={28} strokeWidth={1.5} />,
     farbe: '#3b82f6',
@@ -25,7 +27,9 @@ const DIENSTE: Dienst[] = [
   },
 ]
 
-export default function App() {
+export default function HomePage() {
+  const { user, loading, logout } = useAuth()
+
   useEffect(() => { applyTheme(getStoredTheme()) }, [])
 
   return (
@@ -59,16 +63,42 @@ export default function App() {
             Schloss
           </span>
         </div>
-        <ThemeToggle />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          {!loading && (
+            user ? (
+              <>
+                <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{user.name}</span>
+                <button
+                  className="btn-ghost"
+                  style={{ padding: '0.4rem 0.625rem', gap: '0.375rem' }}
+                  onClick={() => { void logout() }}
+                >
+                  <LogOut size={15} />
+                  Выйти
+                </button>
+              </>
+            ) : (
+              <button
+                className="btn-primary"
+                style={{ padding: '0.4rem 0.75rem' }}
+                onClick={() => { window.location.href = buildSchluesselLoginUrl('/') }}
+              >
+                Войти
+              </button>
+            )
+          )}
+          <ThemeToggle />
+        </div>
       </header>
 
       <main style={{ flex: 1, padding: '2.5rem 1.5rem', maxWidth: 900, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>
-            Guten Tag
+            {user ? `Добрый день, ${user.name}` : 'Добрый день'}
           </h1>
           <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
-            Deine persönlichen Dienste auf einen Blick
+            Твои личные сервисы под рукой
           </p>
         </div>
 
@@ -85,7 +115,7 @@ export default function App() {
         color: 'var(--text-muted)',
         fontSize: '0.75rem',
       }}>
-        Schloss — Open Source, selbst gehostet
+        Schloss — открытый код, свой хостинг
       </footer>
     </div>
   )
@@ -141,7 +171,7 @@ function DienstKarte({ dienst }: { dienst: Dienst }) {
               fontSize: '0.65rem', fontWeight: 600, padding: '0.1rem 0.375rem',
               borderRadius: 99, background: 'var(--warning-muted)', color: 'var(--warning)',
               textTransform: 'uppercase', letterSpacing: '0.05em',
-            }}>Bald</span>
+            }}>Скоро</span>
           )}
         </div>
         <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
@@ -163,7 +193,7 @@ function PlatzhalterKarte() {
     }}>
       <Plus size={24} color="var(--text-muted)" strokeWidth={1.5} />
       <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-        Weitere Dienste folgen
+        Скоро появятся новые сервисы
       </span>
     </div>
   )
