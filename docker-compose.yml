@@ -4,7 +4,7 @@
 # must be on the same network for schloss to reach it by hostname.
 #
 # Does not publish a host port - reached through the Tor gateway (see
-# https://github.com/zudaR107/Tor), which is the only container that
+# https://github.com/zudaR107/tor), which is the only container that
 # binds to a host port.
 services:
   schloss:
