@@ -3,7 +3,7 @@
 # schlussel runs from its own repo (see schlussel/docker-compose.yml) and
 # must be on the same network for schloss to reach it by hostname.
 #
-# Does not publish a host port - reached through the Tor gateway (see
+# Does not publish a host port - reached through the tor gateway (see
 # https://github.com/zudaR107/tor), which is the only container that
 # binds to a host port.
 services:

@@ -16,7 +16,7 @@ fit best; add a new section if none fits.
 - Migrated from nginx to Caddy in the web image.
 - Docker images published to GHCR on merge to `main`.
 - Dependabot for both npm and GitHub Actions dependencies.
-- Dropped published host port - reached only through the Tor gateway now.
+- Dropped published host port - reached only through the tor gateway now.
 
 ## Docs
 - README, AGPL-3.0 LICENSE, CONTRIBUTING.md.
@@ -25,5 +25,6 @@ fit best; add a new section if none fits.
 ## Polish
 - Homepage visual polish: hero illustration, a three-tile highlights strip,
   a GitHub link in the footer, smoother card hover easing.
-- License/CI badges, a link to the Hof meta-repo, fixed Tor->tor URL casing
-  after the gateway repo's rename.
+- License/CI badges, a link to the Hof meta-repo, fixed gateway repo URL
+  casing after its rename to lowercase.
+- Wrote the gateway's project name lowercase ("tor") everywhere in prose.
