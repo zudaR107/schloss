@@ -41,6 +41,12 @@ describe('HomePage', () => {
     expect(screen.queryByText(/Добрый день/)).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /Kuvert/ })).not.toBeInTheDocument()
     expect(screen.queryByText('Скоро появятся новые сервисы')).not.toBeInTheDocument()
+    // Additive hero/highlights/footer content must also be absent in these states
+    expect(document.body.querySelector('img')).toBeNull()
+    expect(screen.queryByText('Свой хостинг')).not.toBeInTheDocument()
+    expect(screen.queryByText('Открытый код')).not.toBeInTheDocument()
+    expect(screen.queryByText('Твои данные — твои')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /github/i })).not.toBeInTheDocument()
   }
 
   // -------------------------------------------------------------------------
@@ -131,5 +137,76 @@ describe('HomePage', () => {
 
     expect(window.location.href).not.toBe(loginUrl)
     expect(window.location.href).toBe(originalHref)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Additive visual content: hero illustration, highlights strip, GitHub footer link
+// ---------------------------------------------------------------------------
+describe('HomePage - hero illustration, highlights strip, and GitHub footer link', () => {
+  beforeEach(() => {
+    useAuthMock.mockReset()
+    originalLocation = window.location
+    // @ts-expect-error -- intentionally deleting to stub location for the test
+    delete window.location
+    // @ts-expect-error -- plain writable stand-in object
+    window.location = { ...originalLocation, href: originalLocation.href }
+  })
+
+  afterEach(() => {
+    cleanup()
+    // @ts-expect-error -- restore the real Location object
+    window.location = originalLocation
+  })
+
+  it('renders a decorative hero illustration image with empty alt and a non-empty src when not loading and user is set', () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    const { container } = render(<HomePage />)
+
+    const heroImg = container.querySelector('img')
+    expect(heroImg).not.toBeNull()
+    expect(heroImg?.getAttribute('alt')).toBe('')
+    expect(heroImg?.getAttribute('src')).toBeTruthy()
+  })
+
+  it('renders exactly three highlight tiles with the expected titles when not loading and user is set', () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    render(<HomePage />)
+
+    expect(screen.getByText('Свой хостинг')).toBeInTheDocument()
+    expect(screen.getByText('Открытый код')).toBeInTheDocument()
+    expect(screen.getByText('Твои данные — твои')).toBeInTheDocument()
+  })
+
+  it('renders a GitHub footer link opening in a new tab with a safe rel attribute when not loading and user is set', () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    render(<HomePage />)
+
+    const githubLink = screen.getByRole('link', { name: /github/i })
+    expect(githubLink).toHaveAttribute('href', 'https://github.com/zudaR107')
+    expect(githubLink).toHaveAttribute('target', '_blank')
+    expect(githubLink.getAttribute('rel')).toEqual(expect.stringContaining('noreferrer'))
+  })
+
+  it('does not render the hero image, highlight tiles, or GitHub link while loading is true', () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: true, logout: vi.fn(), setUser: vi.fn() })
+    const { container } = render(<HomePage />)
+
+    expect(container.querySelector('img')).toBeNull()
+    expect(screen.queryByText('Свой хостинг')).not.toBeInTheDocument()
+    expect(screen.queryByText('Открытый код')).not.toBeInTheDocument()
+    expect(screen.queryByText('Твои данные — твои')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /github/i })).not.toBeInTheDocument()
+  })
+
+  it('does not render the hero image, highlight tiles, or GitHub link when not loading and user is null', () => {
+    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    const { container } = render(<HomePage />)
+
+    expect(container.querySelector('img')).toBeNull()
+    expect(screen.queryByText('Свой хостинг')).not.toBeInTheDocument()
+    expect(screen.queryByText('Открытый код')).not.toBeInTheDocument()
+    expect(screen.queryByText('Твои данные — твои')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /github/i })).not.toBeInTheDocument()
   })
 })

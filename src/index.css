@@ -257,3 +257,13 @@
     box-shadow: 0 0 0 3px var(--accent-muted);
   }
 }
+
+.hero-illustration {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .hero-illustration {
+    display: none;
+  }
+}
