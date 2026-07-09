@@ -13,10 +13,9 @@ Each service is its own repo, named after a German word related to what it does:
 - [`kuvert`](https://github.com/zudaR107/kuvert) — envelope budgeting, the first real
   service
 
-Schloss itself stays fully public — it's a launcher, not something worth gating behind
-a login. Logged-out visitors see a generic greeting and a "Войти" (sign in) button;
-signing in redirects to Schlüssel's hosted login page and back, after which the header
-shows your name and a logout option.
+The home page requires being signed in — an unauthenticated visitor is redirected
+straight to Schlüssel's hosted login page and back, after which the header shows your
+name and a logout option.
 
 ## Local development
 
@@ -43,12 +42,13 @@ the same values, but as the Docker build args `docker-compose.yml` passes throug
 ## Running with Docker
 
 ```sh
-docker network create schloss-net   # one-time, shared with the other two repos
+docker network create schloss-net   # one-time, shared with the other repos
 docker compose up -d
 ```
 
-Serves on `:3000`, on the same `schloss-net` network as `schlussel` and `kuvert` so it
-can reach both by hostname.
+Does not publish a host port — reached through the
+[Tor](https://github.com/zudaR107/Tor) gateway (`http://localhost` in local dev), on the
+same `schloss-net` network as `schlussel` and `kuvert` so it can reach both by hostname.
 
 ## License
 

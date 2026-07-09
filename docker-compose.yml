@@ -2,16 +2,18 @@
 #   docker network create schloss-net
 # schlussel runs from its own repo (see schlussel/docker-compose.yml) and
 # must be on the same network for schloss to reach it by hostname.
+#
+# Does not publish a host port - reached through the Tor gateway (see
+# https://github.com/zudaR107/Tor), which is the only container that
+# binds to a host port.
 services:
   schloss:
     build:
       context: .
       args:
-        VITE_KUVERT_URL: ${KUVERT_URL:-http://localhost:5174}
-        VITE_SCHLUSSEL_URL: ${SCHLUSSEL_WEB_URL:-http://localhost:4001}
+        VITE_KUVERT_URL: ${KUVERT_URL:-http://kuvert.localhost}
+        VITE_SCHLUSSEL_URL: ${SCHLUSSEL_WEB_URL:-http://auth.localhost}
     restart: unless-stopped
-    ports:
-      - "3000:80"
     networks:
       - schloss-net
 
