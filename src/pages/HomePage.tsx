@@ -62,7 +62,7 @@ export default function HomePage() {
   // instead of ever showing page content.
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = buildSchluesselLoginUrl('/')
+      void buildSchluesselLoginUrl('/').then((url) => { window.location.href = url })
     }
   }, [loading, user])
 

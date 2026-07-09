@@ -5,87 +5,140 @@ import { buildSchluesselLoginUrl } from '../lib/authRedirect'
  *
  *   base = {VITE_SCHLUSSEL_URL or 'http://localhost:4001'}
  *   returnTo = `${origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
- *   result = `${base}/login?return_to=${encodeURIComponent(returnTo)}`
+ *   result = `${base}/login?return_to=${encodeURIComponent(returnTo)}&code_challenge=...&code_challenge_method=S256`
+ *
+ * Since code_challenge is random per call, tests that need an exact string
+ * match strip/ignore the PKCE params and assert on the return_to portion,
+ * or assert the PKCE params separately via shape checks.
  */
-function expectedUrl(base: string, origin: string, currentPath: string): string {
+function expectedReturnToParam(origin: string, currentPath: string): string {
   const returnTo = `${origin}/auth/callback?next=${encodeURIComponent(currentPath)}`
-  return `${base}/login?return_to=${encodeURIComponent(returnTo)}`
+  return `return_to=${encodeURIComponent(returnTo)}`
 }
 
+const BASE64URL_RE = /^[A-Za-z0-9_-]+$/
+
 describe('buildSchluesselLoginUrl', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs()
+  beforeEach(() => {
+    sessionStorage.clear()
   })
 
-  it('falls back to http://localhost:4001 when VITE_SCHLUSSEL_URL is unset', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    sessionStorage.clear()
+  })
+
+  it('falls back to http://localhost:4001 when VITE_SCHLUSSEL_URL is unset', async () => {
     // Sanity: confirm the env var really is unset in this test environment.
     expect(import.meta.env.VITE_SCHLUSSEL_URL).toBeUndefined()
 
-    const result = buildSchluesselLoginUrl('/dashboard')
-    expect(result).toBe(expectedUrl('http://localhost:4001', window.location.origin, '/dashboard'))
+    const result = await buildSchluesselLoginUrl('/dashboard')
+    expect(result.startsWith('http://localhost:4001/login?')).toBe(true)
+    expect(result).toContain(expectedReturnToParam(window.location.origin, '/dashboard'))
   })
 
-  it('uses window.location.origin as the default origin when the second arg is omitted', () => {
-    const result = buildSchluesselLoginUrl('/settings')
+  it('uses window.location.origin as the default origin when the second arg is omitted', async () => {
+    const result = await buildSchluesselLoginUrl('/settings')
     const returnTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent('/settings')}`
     expect(result).toContain(encodeURIComponent(returnTo))
   })
 
-  it('uses the explicitly-provided origin instead of window.location.origin when given', () => {
-    const result = buildSchluesselLoginUrl('/settings', 'https://custom.example.org')
-    expect(result).toBe(expectedUrl('http://localhost:4001', 'https://custom.example.org', '/settings'))
+  it('uses the explicitly-provided origin instead of window.location.origin when given', async () => {
+    const result = await buildSchluesselLoginUrl('/settings', 'https://custom.example.org')
+    expect(result).toContain(expectedReturnToParam('https://custom.example.org', '/settings'))
+
     // Must differ from the default-origin call since the origins differ.
-    expect(result).not.toBe(buildSchluesselLoginUrl('/settings'))
+    const other = await buildSchluesselLoginUrl('/settings')
+    expect(result).not.toBe(other)
   })
 
-  it('reads VITE_SCHLUSSEL_URL from the environment when set', () => {
+  it('reads VITE_SCHLUSSEL_URL from the environment when set', async () => {
     vi.stubEnv('VITE_SCHLUSSEL_URL', 'https://schluessel.example.com')
-    const result = buildSchluesselLoginUrl('/', 'https://app.example.com')
-    expect(result).toBe(expectedUrl('https://schluessel.example.com', 'https://app.example.com', '/'))
-    expect(result.startsWith('https://schluessel.example.com/login?return_to=')).toBe(true)
+    const result = await buildSchluesselLoginUrl('/', 'https://app.example.com')
+    expect(result.startsWith('https://schluessel.example.com/login?')).toBe(true)
+    expect(result).toContain(expectedReturnToParam('https://app.example.com', '/'))
   })
 
-  it('url-encodes special characters in currentPath (query params, spaces, unicode)', () => {
+  it('url-encodes special characters in currentPath (query params, spaces, unicode)', async () => {
     const path = '/settings?tab=profile&x=1 2#frag'
-    const result = buildSchluesselLoginUrl(path, 'https://app.example.com')
-    expect(result).toBe(expectedUrl('http://localhost:4001', 'https://app.example.com', path))
+    const result = await buildSchluesselLoginUrl(path, 'https://app.example.com')
+    expect(result).toContain(expectedReturnToParam('https://app.example.com', path))
   })
 
-  it('handles the root path "/"', () => {
-    const result = buildSchluesselLoginUrl('/', 'https://app.example.com')
-    expect(result).toBe(expectedUrl('http://localhost:4001', 'https://app.example.com', '/'))
+  it('handles the root path "/"', async () => {
+    const result = await buildSchluesselLoginUrl('/', 'https://app.example.com')
+    expect(result).toContain(expectedReturnToParam('https://app.example.com', '/'))
   })
 
-  it('handles an empty-string currentPath', () => {
-    const result = buildSchluesselLoginUrl('', 'https://app.example.com')
-    expect(result).toBe(expectedUrl('http://localhost:4001', 'https://app.example.com', ''))
+  it('handles an empty-string currentPath', async () => {
+    const result = await buildSchluesselLoginUrl('', 'https://app.example.com')
+    expect(result).toContain(expectedReturnToParam('https://app.example.com', ''))
   })
 
-  it('double-encodes correctly: the inner next value is percent-encoded once, then the whole return_to is percent-encoded again', () => {
+  it('double-encodes correctly: the inner next value is percent-encoded once, then the whole return_to is percent-encoded again', async () => {
     const path = '/a/b?c=d'
-    const result = buildSchluesselLoginUrl(path, 'https://app.example.com')
+    const result = await buildSchluesselLoginUrl(path, 'https://app.example.com')
 
-    // Reconstruct manually, step by step, and confirm exact match.
+    // Reconstruct manually, step by step, and confirm the return_to portion matches exactly.
     const innerNext = encodeURIComponent(path) // "%2Fa%2Fb%3Fc%3Dd"
     const returnTo = `https://app.example.com/auth/callback?next=${innerNext}`
     const outerReturnTo = encodeURIComponent(returnTo)
-    expect(result).toBe(`http://localhost:4001/login?return_to=${outerReturnTo}`)
+    expect(result.startsWith(`http://localhost:4001/login?`)).toBe(true)
+    expect(result).toContain(`return_to=${outerReturnTo}`)
 
-    // Sanity check: the result should NOT contain a literal, unescaped '?' or '&'
-    // from the return_to portion (they must all have been percent-encoded away).
-    const queryPart = result.split('?return_to=')[1]
-    expect(queryPart).not.toContain('?')
-    expect(queryPart).not.toContain('&')
+    // Sanity check: the return_to value itself should not contain a literal,
+    // unescaped '?' or '&' (they must all have been percent-encoded away).
+    expect(outerReturnTo).not.toContain('?')
+    expect(outerReturnTo).not.toContain('&')
   })
 
-  it('is a pure function: same inputs produce the same output on repeated calls', () => {
-    const a = buildSchluesselLoginUrl('/x', 'https://app.example.com')
-    const b = buildSchluesselLoginUrl('/x', 'https://app.example.com')
-    expect(a).toBe(b)
+  it('produces a result containing "/login?" regardless of inputs', async () => {
+    const result = await buildSchluesselLoginUrl('/anything', 'https://app.example.com')
+    expect(result).toContain('/login?')
   })
 
-  it('produces a result containing "/login?return_to=" regardless of inputs', () => {
-    const result = buildSchluesselLoginUrl('/anything', 'https://app.example.com')
-    expect(result).toContain('/login?return_to=')
+  // -------------------------------------------------------------------------
+  // PKCE behavior
+  // -------------------------------------------------------------------------
+
+  it('includes a code_challenge and code_challenge_method=S256 query param in the resolved URL', async () => {
+    const result = await buildSchluesselLoginUrl('/dashboard', 'https://app.example.com')
+    const url = new URL(result)
+    expect(url.searchParams.get('code_challenge_method')).toBe('S256')
+
+    const challenge = url.searchParams.get('code_challenge')
+    expect(challenge).not.toBeNull()
+    expect(challenge!.length).toBeGreaterThanOrEqual(40)
+    expect(challenge).toMatch(BASE64URL_RE)
+  })
+
+  it('stores something in sessionStorage (the PKCE code_verifier) before resolving', async () => {
+    expect(sessionStorage.length).toBe(0)
+    await buildSchluesselLoginUrl('/dashboard', 'https://app.example.com')
+    expect(sessionStorage.length).toBeGreaterThanOrEqual(1)
+
+    // The stored value should look like a plausible verifier: a nonempty string.
+    let foundPlausibleValue = false
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i)
+      if (!key) continue
+      const value = sessionStorage.getItem(key)
+      if (typeof value === 'string' && value.length > 0) {
+        foundPlausibleValue = true
+      }
+    }
+    expect(foundPlausibleValue).toBe(true)
+  })
+
+  it('generates a different code_challenge on each call (fresh random verifier every time)', async () => {
+    const first = await buildSchluesselLoginUrl('/dashboard', 'https://app.example.com')
+    const second = await buildSchluesselLoginUrl('/dashboard', 'https://app.example.com')
+
+    const firstChallenge = new URL(first).searchParams.get('code_challenge')
+    const secondChallenge = new URL(second).searchParams.get('code_challenge')
+
+    expect(firstChallenge).not.toBeNull()
+    expect(secondChallenge).not.toBeNull()
+    expect(firstChallenge).not.toBe(secondChallenge)
   })
 })
