@@ -32,6 +32,24 @@ export default function HomePage() {
 
   useEffect(() => { applyTheme(getStoredTheme()) }, [])
 
+  // The home page requires authentication: once the silent-refresh check
+  // resolves with no user, bounce straight to schlussel's hosted login
+  // instead of ever showing page content.
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = buildSchluesselLoginUrl('/')
+    }
+  }, [loading, user])
+
+  if (loading || !user) {
+    return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--bg-base)',
+      }} />
+    )
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header style={{
@@ -65,29 +83,15 @@ export default function HomePage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
-          {!loading && (
-            user ? (
-              <>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{user.name}</span>
-                <button
-                  className="btn-ghost"
-                  style={{ padding: '0.4rem 0.625rem', gap: '0.375rem' }}
-                  onClick={() => { void logout() }}
-                >
-                  <LogOut size={15} />
-                  Выйти
-                </button>
-              </>
-            ) : (
-              <button
-                className="btn-primary"
-                style={{ padding: '0.4rem 0.75rem' }}
-                onClick={() => { window.location.href = buildSchluesselLoginUrl('/') }}
-              >
-                Войти
-              </button>
-            )
-          )}
+          <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>{user.name}</span>
+          <button
+            className="btn-ghost"
+            style={{ padding: '0.4rem 0.625rem', gap: '0.375rem' }}
+            onClick={() => { void logout() }}
+          >
+            <LogOut size={15} />
+            Выйти
+          </button>
           <ThemeToggle />
         </div>
       </header>
@@ -95,7 +99,7 @@ export default function HomePage() {
       <main style={{ flex: 1, padding: '2.5rem 1.5rem', maxWidth: 900, margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>
-            {user ? `Добрый день, ${user.name}` : 'Добрый день'}
+            {`Добрый день, ${user.name}`}
           </h1>
           <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
             Твои личные сервисы под рукой
