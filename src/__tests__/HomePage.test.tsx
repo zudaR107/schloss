@@ -1,4 +1,4 @@
-import { render, screen, cleanup } from '@testing-library/react'
+import { render, screen, cleanup, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import HomePage from '../pages/HomePage'
 import { buildSchluesselLoginUrl } from '../lib/authRedirect'
@@ -33,73 +33,66 @@ describe('HomePage', () => {
   })
 
   // -------------------------------------------------------------------------
-  // Greeting
+  // Helper to assert nothing renders
   // -------------------------------------------------------------------------
-  it('greets with just "Добрый день" (no name) when user is null', () => {
-    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
-    const { container } = render(<HomePage />)
-    expect(container.textContent).toMatch(/Добрый день(?!,)/)
+  function expectNoPageContent() {
+    expect(screen.queryByRole('button', { name: /Войти/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Выйти/ })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Добрый день/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Kuvert/ })).not.toBeInTheDocument()
+    expect(screen.queryByText('Скоро появятся новые сервисы')).not.toBeInTheDocument()
+  }
+
+  // -------------------------------------------------------------------------
+  // Loading state: nothing should render, regardless of user
+  // -------------------------------------------------------------------------
+  it('renders no page content while loading is true (user null)', () => {
+    useAuthMock.mockReturnValue({ user: null, loading: true, logout: vi.fn(), setUser: vi.fn() })
+    render(<HomePage />)
+    expectNoPageContent()
   })
 
-  it('greets with "Добрый день, {name}" when user is set', () => {
+  it('renders no page content while loading is true (user set)', () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: true, logout: vi.fn(), setUser: vi.fn() })
+    render(<HomePage />)
+    expectNoPageContent()
+  })
+
+  // -------------------------------------------------------------------------
+  // Logged out, not loading: nothing renders, and it redirects to login
+  // -------------------------------------------------------------------------
+  it('renders no page content when not loading and user is null', () => {
+    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    render(<HomePage />)
+    expectNoPageContent()
+  })
+
+  it('redirects to buildSchluesselLoginUrl(\'/\') automatically when not loading and user is null', async () => {
+    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    const expectedHref = buildSchluesselLoginUrl('/')
+
+    render(<HomePage />)
+
+    await waitFor(() => {
+      expect(window.location.href).toBe(expectedHref)
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Logged in, not loading: full page renders, no redirect happens
+  // -------------------------------------------------------------------------
+  it('greets with "Добрый день, {name}" when not loading and user is set', () => {
     useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
     const { container } = render(<HomePage />)
     expect(container.textContent).toContain('Добрый день, Анна')
   })
 
-  it('greeting reflects the user regardless of loading state', () => {
-    useAuthMock.mockReturnValue({ user: sampleUser, loading: true, logout: vi.fn(), setUser: vi.fn() })
-    const { container } = render(<HomePage />)
-    expect(container.textContent).toContain('Добрый день, Анна')
-  })
-
-  // -------------------------------------------------------------------------
-  // Loading state: no auth buttons should flash
-  // -------------------------------------------------------------------------
-  it('renders neither a "Войти" nor a "Выйти" button while loading is true (user null)', () => {
-    useAuthMock.mockReturnValue({ user: null, loading: true, logout: vi.fn(), setUser: vi.fn() })
-    render(<HomePage />)
-    expect(screen.queryByRole('button', { name: /Войти/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Выйти/ })).not.toBeInTheDocument()
-  })
-
-  it('renders neither a "Войти" nor a "Выйти" button while loading is true (user set)', () => {
-    useAuthMock.mockReturnValue({ user: sampleUser, loading: true, logout: vi.fn(), setUser: vi.fn() })
-    render(<HomePage />)
-    expect(screen.queryByRole('button', { name: /Войти/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Выйти/ })).not.toBeInTheDocument()
-  })
-
-  // -------------------------------------------------------------------------
-  // Logged out, not loading
-  // -------------------------------------------------------------------------
-  it('shows a "Войти" button (exact accessible name) when not loading and user is null', () => {
-    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
-    render(<HomePage />)
-    expect(screen.getByRole('button', { name: 'Войти' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /Выйти/ })).not.toBeInTheDocument()
-  })
-
-  it('clicking "Войти" sets window.location.href to buildSchluesselLoginUrl(\'/\')', async () => {
-    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
-    const user = userEvent.setup()
-    render(<HomePage />)
-
-    const expectedHref = buildSchluesselLoginUrl('/')
-    await user.click(screen.getByRole('button', { name: 'Войти' }))
-
-    expect(window.location.href).toBe(expectedHref)
-  })
-
-  // -------------------------------------------------------------------------
-  // Logged in, not loading
-  // -------------------------------------------------------------------------
-  it('shows the user\'s name and a "Выйти"-named button when not loading and user is set', () => {
+  it('shows the user\'s name and a "Выйти"-named button, and no "Войти" button, when not loading and user is set', () => {
     useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
     const { container } = render(<HomePage />)
     expect(container.textContent).toContain('Анна')
     expect(screen.getByRole('button', { name: /Выйти/ })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Войти' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Войти/ })).not.toBeInTheDocument()
   })
 
   it('clicking "Выйти" calls logout()', async () => {
@@ -113,26 +106,30 @@ describe('HomePage', () => {
     expect(logoutMock).toHaveBeenCalledTimes(1)
   })
 
-  // -------------------------------------------------------------------------
-  // Static content: service cards
-  // -------------------------------------------------------------------------
-  it('renders a clickable "Kuvert" link', () => {
-    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
+  it('renders a clickable "Kuvert" link when not loading and user is set', () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
     render(<HomePage />)
     const kuvertLink = screen.getByRole('link', { name: /Kuvert/ })
     expect(kuvertLink).toBeInTheDocument()
   })
 
-  it('renders the "coming soon" placeholder card with the exact text', () => {
-    useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
+  it('renders the "coming soon" placeholder card with the exact text when not loading and user is set', () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
     render(<HomePage />)
     expect(screen.getByText('Скоро появятся новые сервисы')).toBeInTheDocument()
   })
 
-  it('renders service cards regardless of auth/loading state', () => {
-    useAuthMock.mockReturnValue({ user: sampleUser, loading: true, logout: vi.fn(), setUser: vi.fn() })
+  it('does not redirect to the login URL when not loading and user is set', async () => {
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    const loginUrl = buildSchluesselLoginUrl('/')
+    const originalHref = window.location.href
+
     render(<HomePage />)
-    expect(screen.getByRole('link', { name: /Kuvert/ })).toBeInTheDocument()
-    expect(screen.getByText('Скоро появятся новые сервисы')).toBeInTheDocument()
+
+    // give any stray effect a tick to (incorrectly) fire before asserting
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(window.location.href).not.toBe(loginUrl)
+    expect(window.location.href).toBe(originalHref)
   })
 })
