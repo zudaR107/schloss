@@ -25,3 +25,5 @@ fit best; add a new section if none fits.
 ## Polish
 - Homepage visual polish: hero illustration, a three-tile highlights strip,
   a GitHub link in the footer, smoother card hover easing.
+- License/CI badges, a link to the Hof meta-repo, fixed Tor->tor URL casing
+  after the gateway repo's rename.

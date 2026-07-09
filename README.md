@@ -1,5 +1,10 @@
 # Schloss
 
+[![Test](https://github.com/zudaR107/schloss/actions/workflows/test.yml/badge.svg)](https://github.com/zudaR107/schloss/actions/workflows/test.yml)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+
+Part of the [Schloss platform](https://github.com/zudaR107/Hof).
+
 Schloss ("castle" / "lock" in German) is the home page and launcher for a small suite of
 self-hosted personal services. It's the first thing you see: it shows which services are
 available and, once you're signed in, a bit of personalization.
@@ -47,7 +52,7 @@ docker compose up -d
 ```
 
 Does not publish a host port — reached through the
-[Tor](https://github.com/zudaR107/Tor) gateway (`http://localhost` in local dev), on the
+[Tor](https://github.com/zudaR107/tor) gateway (`http://localhost` in local dev), on the
 same `schloss-net` network as `schlussel` and `kuvert` so it can reach both by hostname.
 
 ## License
