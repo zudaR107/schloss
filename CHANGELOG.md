@@ -9,6 +9,10 @@ fit best; add a new section if none fits.
   schlussel's hosted login and back.
 - The home page now requires authentication - unauthenticated visitors
   redirect straight to schlussel's login instead of seeing any content.
+- Adopted Authorization Code + PKCE for the login handoff: generates and
+  stores a PKCE verifier before redirecting, and the callback page
+  exchanges the returned code for the real token via POST /auth/token
+  instead of reading it from the URL fragment.
 
 ## Infrastructure
 - CI (tests + lint) on every push/PR.

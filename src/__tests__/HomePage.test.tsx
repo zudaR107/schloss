@@ -73,15 +73,27 @@ describe('HomePage', () => {
     expectNoPageContent()
   })
 
-  it('redirects to buildSchluesselLoginUrl(\'/\') automatically when not loading and user is null', async () => {
+  it('redirects to a Schlüssel login URL (with PKCE params) automatically when not loading and user is null', async () => {
     useAuthMock.mockReturnValue({ user: null, loading: false, logout: vi.fn(), setUser: vi.fn() })
-    const expectedHref = buildSchluesselLoginUrl('/')
 
     render(<HomePage />)
 
     await waitFor(() => {
-      expect(window.location.href).toBe(expectedHref)
+      expect(window.location.href).toContain('/login?')
     })
+
+    // buildSchluesselLoginUrl now generates a fresh random PKCE code_challenge
+    // on every call, so we can no longer assert exact equality against a
+    // separately-computed "expected" URL (two calls never produce the same
+    // challenge). Instead assert on the URL's shape/contents.
+    const url = new URL(window.location.href)
+    expect(url.searchParams.get('code_challenge_method')).toBe('S256')
+    expect(url.searchParams.get('code_challenge')).toBeTruthy()
+
+    // URLSearchParams.get() already decodes once, so return_to here is the
+    // plain (not double-encoded) return_to URL string.
+    const returnTo = url.searchParams.get('return_to') ?? ''
+    expect(returnTo).toContain('/auth/callback?next=%2F')
   })
 
   // -------------------------------------------------------------------------
@@ -127,7 +139,7 @@ describe('HomePage', () => {
 
   it('does not redirect to the login URL when not loading and user is set', async () => {
     useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
-    const loginUrl = buildSchluesselLoginUrl('/')
+    const loginUrl = await buildSchluesselLoginUrl('/')
     const originalHref = window.location.href
 
     render(<HomePage />)
