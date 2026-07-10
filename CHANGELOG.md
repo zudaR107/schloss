@@ -24,6 +24,7 @@ fit best; add a new section if none fits.
 - Fixed docker-compose.yml's default `VITE_KUVERT_URL`/`VITE_SCHLUSSEL_URL`
   to `https://` - tor's gateway auto-upgrades everything to HTTPS, so the
   old `http://` defaults sent visitors to the wrong redirect target.
+- Fixed a stale `http://` mention of the gateway URL in README.md.
 
 ## Docs
 - README, AGPL-3.0 LICENSE, CONTRIBUTING.md.

@@ -52,8 +52,9 @@ docker compose up -d
 ```
 
 Does not publish a host port — reached through the
-[tor](https://github.com/zudaR107/tor) gateway (`http://localhost` in local dev), on the
-same `schloss-net` network as `schlussel` and `kuvert` so it can reach both by hostname.
+[tor](https://github.com/zudaR107/tor) gateway (`https://localhost` in local dev - tor's
+Caddy auto-upgrades everything to HTTPS with its own locally-trusted CA), on the same
+`schloss-net` network as `schlussel` and `kuvert` so it can reach both by hostname.
 
 ## License
 
