@@ -35,6 +35,12 @@ fit best; add a new section if none fits.
 ## Polish
 - Homepage visual polish: hero illustration, a three-tile highlights strip,
   a GitHub link in the footer, smoother card hover easing.
+- Extracted Header/Footer out of HomePage.tsx into their own components
+  (`src/components/Header.tsx`, `Footer.tsx`) - same visuals, now the
+  reference structure the other two services' header/footer work copies.
+  Also stopped caching `/favicon.svg` as `immutable` for a year - the
+  Caddyfile's cache rule now only matches Vite's hashed `/assets/*`
+  output, not root-level static files that never change filename.
 - License/CI badges, a link to the Hof meta-repo, fixed gateway repo URL
   casing after its rename to lowercase.
 - Wrote the gateway's project name lowercase ("tor") everywhere in prose.
