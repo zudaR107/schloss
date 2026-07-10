@@ -21,6 +21,9 @@ fit best; add a new section if none fits.
 - Docker images published to GHCR on merge to `main`.
 - Dependabot for both npm and GitHub Actions dependencies.
 - Dropped published host port - reached only through the tor gateway now.
+- Fixed docker-compose.yml's default `VITE_KUVERT_URL`/`VITE_SCHLUSSEL_URL`
+  to `https://` - tor's gateway auto-upgrades everything to HTTPS, so the
+  old `http://` defaults sent visitors to the wrong redirect target.
 
 ## Docs
 - README, AGPL-3.0 LICENSE, CONTRIBUTING.md.
