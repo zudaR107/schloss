@@ -25,6 +25,8 @@ fit best; add a new section if none fits.
 ## Docs
 - README, AGPL-3.0 LICENSE, CONTRIBUTING.md.
 - Improved the browser tab title.
+- Added CODE_OF_CONDUCT.md, SECURITY.md, issue templates, and a pull
+  request template.
 
 ## Polish
 - Homepage visual polish: hero illustration, a three-tile highlights strip,
