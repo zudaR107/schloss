@@ -11,8 +11,8 @@ services:
     build:
       context: .
       args:
-        VITE_KUVERT_URL: ${KUVERT_URL:-http://kuvert.localhost}
-        VITE_SCHLUSSEL_URL: ${SCHLUSSEL_WEB_URL:-http://auth.localhost}
+        VITE_KUVERT_URL: ${KUVERT_URL:-https://kuvert.localhost}
+        VITE_SCHLUSSEL_URL: ${SCHLUSSEL_WEB_URL:-https://auth.localhost}
     restart: unless-stopped
     networks:
       - schloss-net
