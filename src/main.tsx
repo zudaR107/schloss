@@ -3,7 +3,14 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import { AuthContext, useAuthProvider } from './hooks/useAuth'
 import { router } from './router'
+import { applyTheme, getStoredTheme } from './lib/theme'
 import './index.css'
+
+// Applied here, eagerly, before React ever renders - matching
+// schlussel/web and kuvert - rather than inside a useEffect on the home
+// page, which only runs after the first paint and briefly flashes the
+// default light theme first.
+applyTheme(getStoredTheme())
 
 function Root() {
   const auth = useAuthProvider()

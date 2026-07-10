@@ -3,7 +3,6 @@ import { Wallet, Plus, Server, ShieldCheck, Code2 } from 'lucide-react'
 import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
 import { HeroIllustration } from '../components/HeroIllustration'
-import { getStoredTheme, applyTheme } from '../lib/theme'
 import { useAuth } from '../hooks/useAuth'
 import { buildSchluesselLoginUrl } from '../lib/authRedirect'
 
@@ -55,8 +54,6 @@ const DIENSTE: Dienst[] = [
 
 export default function HomePage() {
   const { user, loading, logout } = useAuth()
-
-  useEffect(() => { applyTheme(getStoredTheme()) }, [])
 
   // The home page requires authentication: once the silent-refresh check
   // resolves with no user, bounce straight to schlussel's hosted login
