@@ -17,6 +17,10 @@
 		file_server
 	}
 
-	@static path *.js *.css *.png *.jpg *.svg *.ico *.woff2
+	# Scoped to /assets/* (Vite's hashed build output), not by extension -
+	# root-level static files like /favicon.svg are NOT content-hashed, so
+	# caching them "immutable" for a year would hide any future change from
+	# returning visitors for that long.
+	@static path /assets/*
 	header @static Cache-Control "public, immutable, max-age=31536000"
 }
