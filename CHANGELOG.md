@@ -13,6 +13,12 @@ fit best; add a new section if none fits.
   stores a PKCE verifier before redirecting, and the callback page
   exchanges the returned code for the real token via POST /auth/token
   instead of reading it from the URL fragment.
+- Restore the stored theme before first paint (a synchronous inline
+  script in index.html's `<head>`, matching schlussel/web and kuvert)
+  instead of only after HomePage's first render, and render a themed
+  blank div in AuthCallbackPage instead of nothing - reduces the flash
+  during the SSO silent-reauth redirect chain, which can load and unload
+  this page within a fraction of a second.
 
 ## Infrastructure
 - CI (tests + lint) on every push/PR.
