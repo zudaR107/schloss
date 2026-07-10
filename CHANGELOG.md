@@ -41,6 +41,12 @@ fit best; add a new section if none fits.
   Also stopped caching `/favicon.svg` as `immutable` for a year - the
   Caddyfile's cache rule now only matches Vite's hashed `/assets/*`
   output, not root-level static files that never change filename.
+- Replaced the homepage hero illustration - an 8-bit indexed-color raster
+  PNG that looked washed out/banded at display size - with a crisp inline
+  SVG castle (`src/components/HeroIllustration.tsx`), in the existing
+  brand palette. Also redrew `favicon.svg`: the old mark was an abstract
+  gradient-blob silhouette that read as a generic lightning bolt at a
+  glance; replaced with a padlock matching the header logo's shape.
 - License/CI badges, a link to the Hof meta-repo, fixed gateway repo URL
   casing after its rename to lowercase.
 - Wrote the gateway's project name lowercase ("tor") everywhere in prose.

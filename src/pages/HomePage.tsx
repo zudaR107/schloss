@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { Wallet, Plus, Server, ShieldCheck, Code2 } from 'lucide-react'
 import { Header } from '../components/Header'
 import { Footer } from '../components/Footer'
+import { HeroIllustration } from '../components/HeroIllustration'
 import { getStoredTheme, applyTheme } from '../lib/theme'
 import { useAuth } from '../hooks/useAuth'
 import { buildSchluesselLoginUrl } from '../lib/authRedirect'
-import heroIllustration from '../assets/hero.png'
 
 interface Highlight {
   icon: React.ReactNode
@@ -93,12 +93,9 @@ export default function HomePage() {
               Твои личные сервисы под рукой
             </p>
           </div>
-          <img
-            src={heroIllustration}
-            alt=""
-            className="hero-illustration"
-            style={{ width: 120, height: 'auto', flexShrink: 0, opacity: 0.9 }}
-          />
+          <div style={{ flexShrink: 0 }}>
+            <HeroIllustration size={120} className="hero-illustration" />
+          </div>
         </div>
 
         <div style={{

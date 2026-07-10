@@ -171,14 +171,13 @@ describe('HomePage - hero illustration, highlights strip, and GitHub footer link
     window.location = originalLocation
   })
 
-  it('renders a decorative hero illustration image with empty alt and a non-empty src when not loading and user is set', () => {
+  it('renders an accessible SVG hero illustration when not loading and user is set', () => {
     useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
-    const { container } = render(<HomePage />)
+    render(<HomePage />)
 
-    const heroImg = container.querySelector('img')
-    expect(heroImg).not.toBeNull()
-    expect(heroImg?.getAttribute('alt')).toBe('')
-    expect(heroImg?.getAttribute('src')).toBeTruthy()
+    const heroSvg = screen.getByRole('img', { name: 'Schloss' })
+    expect(heroSvg).not.toBeNull()
+    expect(heroSvg.tagName.toLowerCase()).toBe('svg')
   })
 
   it('renders exactly three highlight tiles with the expected titles when not loading and user is set', () => {
