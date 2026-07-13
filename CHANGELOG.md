@@ -31,6 +31,10 @@ fit best; add a new section if none fits.
   to `https://` - tor's gateway auto-upgrades everything to HTTPS, so the
   old `http://` defaults sent visitors to the wrong redirect target.
 - Fixed a stale `http://` mention of the gateway URL in README.md.
+- Pinned `pnpm/action-setup`'s version exactly in CI - letting it
+  self-update to the latest 11.x broke every workflow run once pnpm
+  11.12.0 shipped with a bug in its own self-installer, unrelated to
+  any change in this repo.
 
 ## Docs
 - README, AGPL-3.0 LICENSE, CONTRIBUTING.md.
