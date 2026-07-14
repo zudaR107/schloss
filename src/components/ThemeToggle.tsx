@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Sun, Moon, Monitor, Coffee } from 'lucide-react'
+import { Button } from '@zudar107/schloss-ui'
 import { type Theme, THEMES, getStoredTheme, applyTheme } from '../lib/theme'
 
 const ICONS: Record<Theme, React.ReactNode> = {
@@ -29,14 +30,14 @@ export function ThemeToggle() {
 
   return (
     <div style={{ position: 'relative' }}>
-      <button
-        className="btn-ghost"
-        style={{ padding: '0.4rem', borderRadius: 'var(--radius-md)' }}
+      <Button
+        variant="ghost"
+        style={{ padding: '0.4rem', border: 'none' }}
         onClick={() => setOpen((o) => !o)}
         aria-label="Сменить тему"
       >
         {ICONS[theme]}
-      </button>
+      </Button>
 
       {open && (
         <>
