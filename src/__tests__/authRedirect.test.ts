@@ -1,4 +1,4 @@
-import { buildSchluesselLoginUrl } from '../lib/authRedirect'
+import { buildSchluesselLoginUrl, buildSchluesselLogoutUrl, CODE_VERIFIER_STORAGE_KEY } from '../lib/authRedirect'
 
 /**
  * Computes the expected URL directly from the behavioral spec:
@@ -140,5 +140,58 @@ describe('buildSchluesselLoginUrl', () => {
     expect(firstChallenge).not.toBeNull()
     expect(secondChallenge).not.toBeNull()
     expect(firstChallenge).not.toBe(secondChallenge)
+  })
+})
+
+describe('buildSchluesselLogoutUrl', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    sessionStorage.clear()
+  })
+
+  it('returns a URL starting with the schlussel URL followed by /logout', () => {
+    vi.stubEnv('VITE_SCHLUSSEL_URL', 'https://schluessel.example.com')
+    const result = buildSchluesselLogoutUrl('https://app.example.com/')
+    expect(result.startsWith('https://schluessel.example.com/logout?')).toBe(true)
+  })
+
+  it('falls back to http://localhost:4001 when VITE_SCHLUSSEL_URL is unset', () => {
+    // Sanity: confirm the env var really is unset in this test environment.
+    expect(import.meta.env.VITE_SCHLUSSEL_URL).toBeUndefined()
+
+    const result = buildSchluesselLogoutUrl('https://app.example.com/')
+    expect(result.startsWith('http://localhost:4001/logout?')).toBe(true)
+  })
+
+  it('appends return_to=<url-encoded returnTo> when an explicit returnTo is passed', () => {
+    const returnTo = 'https://schloss.test/dashboard'
+    const result = buildSchluesselLogoutUrl(returnTo)
+    expect(result).toContain(`return_to=${encodeURIComponent(returnTo)}`)
+  })
+
+  it('defaults returnTo to `${window.location.origin}/` when omitted', () => {
+    const result = buildSchluesselLogoutUrl()
+    const expectedReturnTo = `${window.location.origin}/`
+    expect(result).toContain(`return_to=${encodeURIComponent(expectedReturnTo)}`)
+  })
+
+  it('does not touch sessionStorage or generate any PKCE verifier/challenge', () => {
+    expect(sessionStorage.getItem(CODE_VERIFIER_STORAGE_KEY)).toBeNull()
+    expect(sessionStorage.length).toBe(0)
+
+    buildSchluesselLogoutUrl('https://app.example.com/')
+
+    expect(sessionStorage.getItem(CODE_VERIFIER_STORAGE_KEY)).toBeNull()
+    expect(sessionStorage.length).toBe(0)
+  })
+
+  it('is synchronous and does not return a Promise', () => {
+    const result = buildSchluesselLogoutUrl('https://app.example.com/')
+    expect(typeof result).toBe('string')
+    expect(result).not.toBeInstanceOf(Promise)
   })
 })

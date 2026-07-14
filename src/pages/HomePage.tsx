@@ -4,7 +4,7 @@ import { Header, Footer, Badge } from '@zudar107/schloss-ui'
 import { HeroIllustration } from '../components/HeroIllustration'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { useAuth } from '../hooks/useAuth'
-import { buildSchluesselLoginUrl } from '../lib/authRedirect'
+import { buildSchluesselLoginUrl, buildSchluesselLogoutUrl } from '../lib/authRedirect'
 
 const LOGO = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2}>
@@ -86,7 +86,7 @@ export default function HomePage() {
         logo={LOGO}
         homeHref="/"
         user={user}
-        onLogout={() => { void logout() }}
+        onLogout={() => { void logout().then(() => { window.location.href = buildSchluesselLogoutUrl() }) }}
         rightSlot={<ThemeToggle />}
       />
 
