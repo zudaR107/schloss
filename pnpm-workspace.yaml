@@ -1,2 +1,2 @@
 minimumReleaseAgeExclude:
-  - '@zudar107/schloss-ui@0.1.0 || 0.3.0'
+  - '@zudar107/schloss-ui@0.1.0 || 0.3.0 || 0.4.0'
