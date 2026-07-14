@@ -3,7 +3,7 @@ FROM node:22-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 # @zudar107/schloss-ui is on GitHub Packages, not npmjs.com - even
 # though the package is public, installing it still requires auth.
