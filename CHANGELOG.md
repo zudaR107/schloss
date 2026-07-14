@@ -60,3 +60,10 @@ fit best; add a new section if none fits.
 - License/CI badges, a link to the Hof meta-repo, fixed gateway repo URL
   casing after its rename to lowercase.
 - Wrote the gateway's project name lowercase ("tor") everywhere in prose.
+- Adopted `@zudar107/schloss-ui`: replaced the local Header/Footer
+  components and ThemeToggle's hand-styled button with the shared
+  package's Header/Footer/Button/Badge, and swapped the hand-copied
+  design tokens for the package's `tokens.css`, layering schloss's own
+  purple accent on top so the header UI and favicon logo share one
+  brand color. Also fixed the favicon's stroke width (2.4 -> 2) to
+  match the shared icon-size/stroke rules.
