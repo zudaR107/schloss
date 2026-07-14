@@ -1,10 +1,17 @@
 import { useEffect } from 'react'
 import { Wallet, Plus, Server, ShieldCheck, Code2 } from 'lucide-react'
-import { Header } from '../components/Header'
-import { Footer } from '../components/Footer'
+import { Header, Footer, Badge } from '@zudar107/schloss-ui'
 import { HeroIllustration } from '../components/HeroIllustration'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { useAuth } from '../hooks/useAuth'
 import { buildSchluesselLoginUrl } from '../lib/authRedirect'
+
+const LOGO = (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2}>
+    <rect x="3" y="11" width="18" height="11" rx="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+)
 
 interface Highlight {
   icon: React.ReactNode
@@ -75,7 +82,13 @@ export default function HomePage() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header user={user} onLogout={() => { void logout() }} />
+      <Header
+        logo={LOGO}
+        homeHref="/"
+        user={user}
+        onLogout={() => { void logout() }}
+        rightSlot={<ThemeToggle />}
+      />
 
       <main style={{ flex: 1, padding: '2.5rem 1.5rem', maxWidth: 900, margin: '0 auto', width: '100%' }}>
         <div style={{
@@ -120,7 +133,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      <Footer />
+      <Footer serviceName="Schloss" />
     </div>
   )
 }
@@ -170,13 +183,7 @@ function DienstKarte({ dienst }: { dienst: Dienst }) {
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
           <span style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--text-primary)' }}>{dienst.name}</span>
-          {!aktiv && (
-            <span style={{
-              fontSize: '0.65rem', fontWeight: 600, padding: '0.1rem 0.375rem',
-              borderRadius: 99, background: 'var(--warning-muted)', color: 'var(--warning)',
-              textTransform: 'uppercase', letterSpacing: '0.05em',
-            }}>Скоро</span>
-          )}
+          {!aktiv && <Badge variant="warning">Скоро</Badge>}
         </div>
         <p style={{ margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
           {dienst.beschreibung}

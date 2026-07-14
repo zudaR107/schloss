@@ -3,8 +3,18 @@ FROM node:22-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml .npmrc ./
+
+# @zudar107/schloss-ui is on GitHub Packages, not npmjs.com - even
+# though the package is public, installing it still requires auth.
+# The token is passed as a BuildKit secret (not an ARG, so it never
+# ends up baked into an image layer) and written to a user-level
+# .npmrc - pnpm refuses to expand env vars in the *project* .npmrc's
+# auth line (to stop a malicious committed .npmrc from exfiltrating a
+# token to an attacker registry), so it can't just go in ./.npmrc.
+RUN --mount=type=secret,id=npm_token \
+    echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/npm_token)" >> /root/.npmrc \
+    && pnpm install --frozen-lockfile
 
 COPY . .
 
