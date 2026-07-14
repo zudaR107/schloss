@@ -13,9 +13,19 @@ services:
       args:
         VITE_KUVERT_URL: ${KUVERT_URL:-https://kuvert.localhost}
         VITE_SCHLUSSEL_URL: ${SCHLUSSEL_WEB_URL:-https://auth.localhost}
+      # @zudar107/schloss-ui is on GitHub Packages - even though it's
+      # public, installing it still requires auth. NODE_AUTH_TOKEN must
+      # be set in the shell/`.env` running `docker compose build` (e.g.
+      # a `read:packages` GitHub PAT, or `$(gh auth token)`).
+      secrets:
+        - npm_token
     restart: unless-stopped
     networks:
       - schloss-net
+
+secrets:
+  npm_token:
+    environment: NODE_AUTH_TOKEN
 
 networks:
   schloss-net:
