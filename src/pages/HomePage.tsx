@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Wallet, Plus, Server, ShieldCheck, Code2 } from 'lucide-react'
 import { Header, Footer, Badge } from '@zudar107/schloss-ui'
 import { HeroIllustration } from '../components/HeroIllustration'
@@ -62,11 +62,19 @@ const DIENSTE: Dienst[] = [
 export default function HomePage() {
   const { user, loading, logout } = useAuth()
 
+  // Set synchronously (before logout()'s own async work starts) by
+  // onLogout below, so this effect can tell "no user because the session
+  // was never established" (needs the login redirect) apart from "no user
+  // because we just deliberately logged out" (already navigating to
+  // schlussel's logout page - a second, competing navigation to the LOGIN
+  // page here would race it and could win, undoing the logout).
+  const loggingOutRef = useRef(false)
+
   // The home page requires authentication: once the silent-refresh check
   // resolves with no user, bounce straight to schlussel's hosted login
   // instead of ever showing page content.
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && !loggingOutRef.current) {
       void buildSchluesselLoginUrl('/').then((url) => { window.location.href = url })
     }
   }, [loading, user])
@@ -86,7 +94,10 @@ export default function HomePage() {
         logo={LOGO}
         homeHref="/"
         user={user}
-        onLogout={() => { void logout().then(() => { window.location.href = buildSchluesselLogoutUrl() }) }}
+        onLogout={() => {
+          loggingOutRef.current = true
+          void logout().then(() => { window.location.href = buildSchluesselLogoutUrl() })
+        }}
         rightSlot={<ThemeToggle />}
       />
 
