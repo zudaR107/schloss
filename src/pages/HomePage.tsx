@@ -133,7 +133,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      <Footer serviceName="Schloss" description="домашняя страница и точка входа" version={__APP_VERSION__} />
+      <Footer serviceName="Schloss" description="Домашняя страница и точка входа" version={__APP_VERSION__} />
     </div>
   )
 }
