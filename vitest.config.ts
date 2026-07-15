@@ -13,5 +13,9 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/__tests__/setup.ts'],
+    // schloss-ui is its own workspace package with its own
+    // vitest.config.ts and test suite - without this exclude, running
+    // from the repo root also sweeps its test files into this run.
+    exclude: ['**/node_modules/**', 'schloss-ui/**'],
   },
 })

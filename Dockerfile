@@ -14,20 +14,21 @@ WORKDIR /app
 # there), so it must be set explicitly here.
 ENV CI=true
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY schloss-ui/package.json ./schloss-ui/
 
-# @zudar107/schloss-ui is on GitHub Packages, not npmjs.com - even
-# though the package is public, installing it still requires auth.
-# The token is passed as a BuildKit secret (not an ARG, so it never
-# ends up baked into an image layer) and written to a user-level
-# .npmrc - pnpm refuses to expand env vars in the *project* .npmrc's
-# auth line (to stop a malicious committed .npmrc from exfiltrating a
-# token to an attacker registry), so it can't just go in ./.npmrc.
-RUN --mount=type=secret,id=npm_token \
-    echo "//npm.pkg.github.com/:_authToken=$(cat /run/secrets/npm_token)" >> /root/.npmrc \
-    && pnpm install --frozen-lockfile
+# schloss-ui is a git submodule, linked via pnpm's workspace:* protocol
+# - no registry involved, so no auth needed. Unfiltered, so this also
+# installs schloss-ui's own devDependencies (tsup etc.), needed below
+# to build it - it's no longer pre-built by a separate publish step.
+RUN pnpm install --frozen-lockfile
 
 COPY . .
+
+# schloss-ui is still consumed as its built dist/ output (same as when
+# it was a registry package), so it needs building here before schloss
+# imports it.
+RUN pnpm --filter @zudar107/schloss-ui build
 
 # Vite bakes import.meta.env.VITE_* into the bundle at build time, so
 # this must be declared as an ARG to actually receive the value passed
