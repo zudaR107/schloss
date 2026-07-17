@@ -4,7 +4,7 @@ import { Header, Footer, Badge } from '@zudar107/schloss-ui'
 import { HeroIllustration } from '../components/HeroIllustration'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { useAuth } from '../hooks/useAuth'
-import { buildSchluesselLoginUrl, buildSchluesselLogoutUrl } from '../lib/authRedirect'
+import { buildSchluesselLoginUrl, buildSchluesselLogoutUrl, buildSchluesselAccountUrl } from '../lib/authRedirect'
 
 const LOGO = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2}>
@@ -94,6 +94,10 @@ export default function HomePage() {
         logo={LOGO}
         homeHref="/"
         user={user}
+        // Opens the platform-wide account settings hosted on schlussel
+        // (password, delete account, ...) - schloss has no settings page
+        // of its own to route to instead.
+        onSettings={() => { window.location.href = buildSchluesselAccountUrl(window.location.pathname) }}
         onLogout={() => {
           loggingOutRef.current = true
           void logout().then(() => { window.location.href = buildSchluesselLogoutUrl() })

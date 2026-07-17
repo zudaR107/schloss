@@ -124,6 +124,19 @@ describe('HomePage', () => {
     expect(logoutMock).toHaveBeenCalledTimes(1)
   })
 
+  it('shows a "Настройки" button that navigates to schlussel\'s unified account page, not a local route', async () => {
+    // schloss has no settings page of its own - the header's gear icon
+    // must send the browser to schlussel's hosted account page instead.
+    useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
+    const user = userEvent.setup()
+    render(<HomePage />)
+
+    await user.click(screen.getByRole('button', { name: 'Настройки' }))
+
+    expect(window.location.href).toContain('/account')
+    expect(window.location.href).toContain('return_to=')
+  })
+
   it('renders a clickable "Kuvert" link when not loading and user is set', () => {
     useAuthMock.mockReturnValue({ user: sampleUser, loading: false, logout: vi.fn(), setUser: vi.fn() })
     render(<HomePage />)
