@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Wallet, Plus, Server, ShieldCheck, Code2 } from 'lucide-react'
-import { Header, Footer, Badge } from '@zudar107/schloss-ui'
+import { Header, Footer, Badge, ThemeToggle } from '@zudar107/schloss-ui'
 import { HeroIllustration } from '../components/HeroIllustration'
-import { ThemeToggle } from '../components/ThemeToggle'
 import { useAuth } from '../hooks/useAuth'
 import { buildSchluesselLoginUrl, buildSchluesselLogoutUrl, buildSchluesselAccountUrl } from '../lib/authRedirect'
 

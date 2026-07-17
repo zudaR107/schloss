@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import { AuthContext, useAuthProvider } from './hooks/useAuth'
 import { router } from './router'
-import { applyTheme, getStoredTheme } from './lib/theme'
+import { applyTheme, getStoredTheme } from '@zudar107/schloss-ui'
 import './index.css'
 
 // Applied here, eagerly, before React ever renders - matching
