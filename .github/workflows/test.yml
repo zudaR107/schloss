@@ -155,11 +155,15 @@ jobs:
           context: .
           platforms: linux/amd64
           push: true
+          # <commit-sha>           - the pre-existing raw-SHA tag contract
+          #   (kept byte-for-byte; an external consumer may already pull by
+          #   it even though nothing inside Hof does).
           # sha-<commit>          - human/external per-commit contract
           # sha-<commit>-run-<id> - the staging tag finalize reads; run-id
           #   (not run-attempt) so a "re-run failed jobs" of only finalize
           #   still finds it.
           tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
             ${{ env.IMAGE }}:sha-${{ github.sha }}
             ${{ env.IMAGE }}:sha-${{ github.sha }}-run-${{ github.run_id }}
 
